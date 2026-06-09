@@ -92,27 +92,38 @@ mcp = FastMCP(
     **auth_kwargs,
 )
 
-# --- Read tools (always available, safe for read-only/remote) ---
-mcp.add_tool(file_tools.read_file)
-mcp.add_tool(file_tools.list_directory)
-mcp.add_tool(file_tools.search_files)
-mcp.add_tool(file_tools.directory_tree)
-mcp.add_tool(file_tools.find_files)
-mcp.add_tool(file_tools.read_lines)
-mcp.add_tool(file_tools.read_many_files)
-mcp.add_tool(file_tools.kb_outline)
-mcp.add_tool(file_tools.kb_stats)
-mcp.add_tool(pdf_tools.read_pdf)
-mcp.add_tool(image_tools.read_image)
-mcp.add_tool(logo_tools.list_logos)
-mcp.add_tool(logo_tools.get_logo)
-
 # --- MinIO / S3 tools (opt-in via MCP_S3_ENABLED=1) ---
+# When S3 is enabled, all data lives in MinIO — use s3_* tools exclusively.
+# When S3 is disabled, fall back to local filesystem tools.
 S3_ENABLED = os.environ.get("MCP_S3_ENABLED", "0") == "1"
+
 if S3_ENABLED:
     mcp.add_tool(s3_tools.s3_list)
+    mcp.add_tool(s3_tools.s3_directory_tree)
+    mcp.add_tool(s3_tools.s3_find_files)
     mcp.add_tool(s3_tools.s3_read)
+    mcp.add_tool(s3_tools.s3_read_lines)
+    mcp.add_tool(s3_tools.s3_read_many)
     mcp.add_tool(s3_tools.s3_search)
+    mcp.add_tool(s3_tools.s3_kb_outline)
+    mcp.add_tool(s3_tools.s3_kb_stats)
+    mcp.add_tool(s3_tools.s3_read_pdf)
+    mcp.add_tool(s3_tools.s3_list_logos)
+    mcp.add_tool(s3_tools.s3_get_logo)
+else:
+    mcp.add_tool(file_tools.read_file)
+    mcp.add_tool(file_tools.list_directory)
+    mcp.add_tool(file_tools.search_files)
+    mcp.add_tool(file_tools.directory_tree)
+    mcp.add_tool(file_tools.find_files)
+    mcp.add_tool(file_tools.read_lines)
+    mcp.add_tool(file_tools.read_many_files)
+    mcp.add_tool(file_tools.kb_outline)
+    mcp.add_tool(file_tools.kb_stats)
+    mcp.add_tool(pdf_tools.read_pdf)
+    mcp.add_tool(image_tools.read_image)
+    mcp.add_tool(logo_tools.list_logos)
+    mcp.add_tool(logo_tools.get_logo)
 
 # --- Google Drive read tools (opt-in via MCP_DRIVE_ENABLED=1) ---
 DRIVE_ENABLED = os.environ.get("MCP_DRIVE_ENABLED", "0") == "1"
