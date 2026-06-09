@@ -30,7 +30,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 
 import prompts
 import resources
-from tools import drive_tools, exec_tools, file_tools, image_tools, logo_tools, pdf_tools, web_tools
+from tools import drive_tools, exec_tools, file_tools, image_tools, logo_tools, pdf_tools, s3_tools, web_tools
 
 HOST = os.environ.get("MCP_HOST", "127.0.0.1")
 PORT = int(os.environ.get("MCP_PORT", "8000"))
@@ -106,6 +106,13 @@ mcp.add_tool(pdf_tools.read_pdf)
 mcp.add_tool(image_tools.read_image)
 mcp.add_tool(logo_tools.list_logos)
 mcp.add_tool(logo_tools.get_logo)
+
+# --- MinIO / S3 tools (opt-in via MCP_S3_ENABLED=1) ---
+S3_ENABLED = os.environ.get("MCP_S3_ENABLED", "0") == "1"
+if S3_ENABLED:
+    mcp.add_tool(s3_tools.s3_list)
+    mcp.add_tool(s3_tools.s3_read)
+    mcp.add_tool(s3_tools.s3_search)
 
 # --- Google Drive read tools (opt-in via MCP_DRIVE_ENABLED=1) ---
 DRIVE_ENABLED = os.environ.get("MCP_DRIVE_ENABLED", "0") == "1"

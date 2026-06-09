@@ -1,4 +1,23 @@
 services:
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console: http://localhost:9001
+    environment:
+      MINIO_ROOT_USER: "${MINIO_USER:-admin}"
+      MINIO_ROOT_PASSWORD: "${MINIO_PASSWORD:-password123}"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   mcp:
     build: .
     ports:
@@ -11,13 +30,23 @@ services:
       MCP_PORT: "8000"
       MCP_THREAD_LIMIT: "120"
       PYTHONUNBUFFERED: "1"
-      # Set MCP_PUBLIC_URL to enable OAuth (required for claude.ai web connector)
-      # e.g. MCP_PUBLIC_URL=https://xxxx.trycloudflare.com
       MCP_PUBLIC_URL: "${MCP_PUBLIC_URL:-}"
+      MCP_DRIVE_ENABLED: "${MCP_DRIVE_ENABLED:-0}"
+      MCP_DRIVE_CREDENTIALS: /app/credentials.json
+      MCP_DRIVE_TOKEN: /app/token.json
+      MCP_DRIVE_FOLDER: "${MCP_DRIVE_FOLDER:-}"
+      # MinIO / S3 config
+      MCP_S3_ENABLED: "${MCP_S3_ENABLED:-1}"
+      MCP_S3_ENDPOINT: "http://minio:9000"
+      MCP_S3_ACCESS_KEY: "${MINIO_USER:-admin}"
+      MCP_S3_SECRET_KEY: "${MINIO_PASSWORD:-password123}"
+      MCP_S3_BUCKET: "${MCP_S3_BUCKET:-brainlnc}"
+      MCP_S3_REGION: "us-east-1"
     volumes:
-      # Mount your knowledge-base folder.
-      # Usage: KB_PATH=/path/to/your/docs docker compose up
       - "${KB_PATH:-./data}:/kb:ro"
+    depends_on:
+      minio:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c",
@@ -27,10 +56,7 @@ services:
       retries: 3
       start_period: 20s
 
-  # Optional: Cloudflare tunnel sidecar — exposes the server publicly.
-  # Uncomment to get a free https://xxxx.trycloudflare.com URL.
-  # Then set MCP_PUBLIC_URL to that URL and restart mcp service.
-  #
+  # Optional: Cloudflare tunnel
   # cloudflared:
   #   image: cloudflare/cloudflared:latest
   #   command: tunnel --url http://mcp:8000
@@ -38,3 +64,6 @@ services:
   #     mcp:
   #       condition: service_healthy
   #   restart: unless-stopped
+
+volumes:
+  minio_data:

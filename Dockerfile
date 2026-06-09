@@ -10,7 +10,7 @@ RUN apt-get update \
 # Install Python dependencies from pyproject.toml (layer cached until it changes)
 COPY pyproject.toml ./
 RUN pip install --no-cache-dir \
-    "mcp[cli]" httpx pypdf pillow \
+    "mcp[cli]" httpx pypdf pillow boto3 \
     google-api-python-client google-auth google-auth-oauthlib
 
 # Copy source

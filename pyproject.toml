@@ -8,6 +8,7 @@ dependencies = [
     "httpx",
     "pypdf",
     "pillow",
+    "boto3",
     "google-api-python-client",
     "google-auth",
     "google-auth-oauthlib",
