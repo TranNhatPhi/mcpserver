@@ -1,0 +1,14 @@
+[project]
+name = "mcpserver"
+version = "0.1.0"
+description = "General-purpose MCP server: file, web, and shell tools"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]",
+    "httpx",
+    "pypdf",
+    "pillow",
+    "google-api-python-client",
+    "google-auth",
+    "google-auth-oauthlib",
+]

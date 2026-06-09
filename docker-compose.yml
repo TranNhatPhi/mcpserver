@@ -1,0 +1,40 @@
+services:
+  mcp:
+    build: .
+    ports:
+      - "${MCP_PORT:-8000}:8000"
+    environment:
+      MCP_BASE_DIR: /kb/brainLNC
+      MCP_READ_ONLY: "${MCP_READ_ONLY:-1}"
+      MCP_TRANSPORT: streamable-http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8000"
+      MCP_THREAD_LIMIT: "120"
+      PYTHONUNBUFFERED: "1"
+      # Set MCP_PUBLIC_URL to enable OAuth (required for claude.ai web connector)
+      # e.g. MCP_PUBLIC_URL=https://xxxx.trycloudflare.com
+      MCP_PUBLIC_URL: "${MCP_PUBLIC_URL:-}"
+    volumes:
+      # Mount your knowledge-base folder.
+      # Usage: KB_PATH=/path/to/your/docs docker compose up
+      - "${KB_PATH:-./data}:/kb:ro"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import socket; s=socket.create_connection(('127.0.0.1',8000),3); s.close()"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # Optional: Cloudflare tunnel sidecar — exposes the server publicly.
+  # Uncomment to get a free https://xxxx.trycloudflare.com URL.
+  # Then set MCP_PUBLIC_URL to that URL and restart mcp service.
+  #
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   command: tunnel --url http://mcp:8000
+  #   depends_on:
+  #     mcp:
+  #       condition: service_healthy
+  #   restart: unless-stopped

@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: mcpserver
+Version: 0.1.0
+Summary: General-purpose MCP server: file, web, and shell tools
+Requires-Python: >=3.10
+Requires-Dist: mcp[cli]
+Requires-Dist: httpx
+Requires-Dist: pypdf
+Requires-Dist: google-api-python-client
+Requires-Dist: google-auth
+Requires-Dist: google-auth-oauthlib
