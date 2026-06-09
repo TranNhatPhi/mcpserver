@@ -1,0 +1,3 @@
+lncmcp.duckdns.org {
+    reverse_proxy mcp:8000
+}
